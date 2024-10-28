@@ -1,0 +1,110 @@
+# Python
+*.py[cod]
+__pycache__/
+*.pyo
+*.pyd
+*.egg-info/
+*.egg
+dist/
+build/
+*.whl
+*.manifest
+*.spec
+
+# Django
+*.log
+*.pot
+*.pyc
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+.env
+.venv/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# React
+node_modules/
+build/
+.DS_Store
+*.log
+*.tmp
+*.backup
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.tgz
+
+# IDEs and editors
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+env/
+
+# Sphinx documentation
+docs/_build/
+docs/.build/
+build/
+*.pyc
+
+# Cython debug symbols
+cython_debug/
+
+# Miscellaneous
+*.swp
+*~
+*.bak
+*.tmp
+*.orig
+*.DS_Store
+
+# Local settings
+local_settings.py
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SQL Database files
+*.sqlite3
+*.db
+
+# Docker
+Dockerfile
+docker-compose.yml
+*.dockerignore
+
+# PyInstaller
+*.spec
+
+# Miscellaneous IDE files
+*.idea/
+*.vscode/
+*.sublime-project
+*.sublime-workspace
