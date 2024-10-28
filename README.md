@@ -4,6 +4,7 @@
 This project is a **Healthcare Management System** designed to manage users, including **patients, doctors, and admins**, as well as **appointments, medical records, prescriptions, and departments**. The system aims to streamline patient care by providing an efficient platform to manage patient records, appointments, and prescriptions through assigned healthcare providers.
 
 ---
+https://files.oaiusercontent.com/file-1m4Mm8oxr5lqAHVipMWT6eDJ?se=2024-10-28T04%3A34%3A10Z&sp=r&sv=2024-08-04&sr=b&rscc=max-age%3D604800%2C%20immutable%2C%20private&rscd=attachment%3B%20filename%3D691a572d-3e58-4fd8-a8b4-83414457d9a3.webp&sig=wg2j5RJ1gUN5TRak6Glbo5ErFRTOvdqrNfFlTvtMwCE%3D
 
 ## **Features**
 - User roles: Admin, Doctor, and Patient.
