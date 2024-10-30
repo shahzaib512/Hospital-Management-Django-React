@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from api.serializers.user_serializer import UserSerializer, ProfileSerializer
+from api.serializers.user_serializer import UserSerializer, ProfileSerializer, LoginSerializer
 from api.models.user_model import Profile
 from api.permission.permissions import IsAdminUser, IsDoctorUser
 
@@ -17,7 +17,7 @@ class UserViewSet(viewsets.ModelViewSet):
     
     def get_permissions(self):
         if self.action == 'create':
-            return [permissions.AllowAny]
+            return [permissions.AllowAny()]
         elif self.action in ['list', 'destroy']:
             return [IsAdminUser()]
         return [permissions.IsAuthenticated()]
@@ -60,6 +60,41 @@ class UserViewSet(viewsets.ModelViewSet):
         user.set_password(new_password)
         user.save()
         return Response({'message': 'Password updated successfully.'})
+    
+    @action(detail=False, methods=['post'])
+    def login(self, request):
+        serializer = LoginSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        user = User.objects.filter(
+            email=serializer.validated_data['email'],
+            password=serializer.validated_data['password']
+        )
+        
+        if not user:
+            return Response(
+                {'error': 'Invalid credentials'}, 
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+            
+        refresh = RefreshToken.for_user(user)
+        
+        return Response({
+            'user': UserSerializer(user).data,
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        })
+    
+    @action(detail=False, methods=['post'])
+    def logout(self, request):
+        try:
+            refresh_token = request.data["refresh"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response(status=status.HTTP_205_RESET_CONTENT)
+        except Exception:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
 
 class ProfileViewSet(viewsets.ModelViewSet):
     serializer_class = ProfileSerializer

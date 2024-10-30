@@ -40,8 +40,17 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data.pop('confirm_password', None)
         profile_data = validated_data.pop('profile', None)
+        branch_data = validated_data.pop('branch', None)
         
         user = User.objects.create_user(**validated_data)
+
+        if branch_data:  # If branch data is provided
+            try:
+                branch_instance = Branch.objects.get(name=branch_data['name'])  # Get the Branch instance
+                user.branch = branch_instance  # Assign it to the user
+                user.save()  # Save the user instance
+            except Branch.DoesNotExist:
+                raise serializers.ValidationError({"branch": "Branch does not exist."})
         
         if profile_data:
             Profile.objects.filter(user=user).update(**profile_data)
@@ -52,13 +61,26 @@ class UserSerializer(serializers.ModelSerializer):
         validated_data.pop('password', None)
         validated_data.pop('confirm_password', None)
         profile_data = validated_data.pop('profile', None)
+        branch_data = validated_data.pop('branch', None)
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
 
+        if branch_data:  # If branch data is provided
+            try:
+                branch_instance = Branch.objects.get(name=branch_data['name'])  # Get the Branch instance
+                instance.branch = branch_instance  # Assign it to the user
+            except Branch.DoesNotExist:
+                raise serializers.ValidationError({"branch": "Branch does not exist."})
+
+
         if profile_data:
             Profile.objects.filter(user=instance).update(**profile_data)
 
         return instance
+    
 
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField()
