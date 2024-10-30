@@ -1,36 +1,57 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
-
-class CustomUserManager(BaseUserManager):
-    def create_user(self, email, username, password=None, **extra_fields):
-        if not email:
-            raise ValueError("The Email field must be set")
-        email = self.normalize_email(email)
-        user = self.model(email=email, username=username, **extra_fields)
-        user.set_password(password)
-        user.save(using=self._db)
-        return user
-
-    def create_superuser(self, email, username, password=None, **extra_fields):
-        extra_fields.setdefault('is_staff', True)
-        extra_fields.setdefault('is_superuser', True)
-
-        return self.create_user(email, username, password, **extra_fields)
-
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from django.utils.translation import gettext_lazy as _
+from .managers import CustomUserManager
 
 class AbstractUser(AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField(unique=True)
-    username = models.CharField(max_length=150, unique=True)
-    full_name = models.CharField(max_length=255)
-    phone = models.CharField(max_length=12)
-    is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
+    email = models.EmailField(
+        _('Email Address'),
+        unique=True,
+        error_messages={
+            'unique': _("A user with that email already exists."),
+        }
+    )
+    username = models.CharField(
+        _('Username'),
+        max_length=150,
+        unique=True,
+        error_messages={
+            'unique': _("A user with that username already exists."),
+        }
+    )
+    is_active = models.BooleanField(
+        _('Active'),
+        default=True,
+        help_text=_('Designates whether this user should be treated as active.')
+    )
+    is_staff = models.BooleanField(
+        _('Staff Status'),
+        default=False,
+        help_text=_('Designates whether the user can log into this admin site.')
+    )
+    is_superuser = models.BooleanField(
+        _('Superuser Status'),
+        default=False,
+        help_text=_('Designates that this user has all permissions without explicitly assigning them.')
+    )
+    date_joined = models.DateTimeField(_('Date Joined'), auto_now_add=True)
+    last_login = models.DateTimeField(_('Last Login'), null=True, blank=True)
+    modified_at = models.DateTimeField(_('Modified At'), auto_now=True)
+
+    objects = CustomUserManager()
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
 
-    objects = CustomUserManager()
-
     class Meta:
         abstract = True
+        verbose_name = _('user')
+        verbose_name_plural = _('users')
+        ordering = ['-date_joined']
+
+    def __str__(self):
+        return self.email
+
+    def clean(self):
+        super().clean()
+        self.email = self.email.lower()
