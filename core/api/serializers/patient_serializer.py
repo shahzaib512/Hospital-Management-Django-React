@@ -1,6 +1,8 @@
 from api.models.patient_model import Patient, Bed
 from api.models.appointment_model import Appointment
 from api.models.surgery_model import OperationTheater, Surgery
+# from ..serializers.appointment_serializer import AppointmentSerializer
+# from ..serializers.surgery_serializer import SurgerySerializer
 from rest_framework import serializers
 from django.utils import timezone
 from datetime import timedelta
@@ -59,20 +61,18 @@ class PatientSerializer(CachedSerializerMixin, serializers.ModelSerializer):
         return (timezone.now().date() - obj.date_of_birth).days // 365
 
     def get_appointments(self, obj):
-        return Appointment.objects.filter(patient=obj).select_related(
+        appointments = Appointment.objects.filter(patient=obj).select_related(
             'doctor', 'doctor__user'
-        ).order_by('-appointment_time')[:5]
+        ).order_by('-appointment_time')
+        serializer = AppointmentSerializer(appointments[:5], many=True)
+        return serializer.data
 
     def get_medical_history(self, obj):
-        surgeries = Surgery.objects.filter(patient=obj).values(
-            'surgery_type', 'scheduled_date', 'complications'
-        )
-        appointments = Appointment.objects.filter(patient=obj).values(
-            'appointment_time', 'reason', 'status'
-        )
+        surgeries = Surgery.objects.filter(patient=obj)
+        appointments = Appointment.objects.filter(patient=obj)
         return {
-            'surgeries': surgeries,
-            'appointments': appointments
+            'surgeries': SurgerySerializer(surgeries, many=True).data,
+            'appointments': AppointmentSerializer(appointments, many=True).data,
         }
 
     def get_upcoming_surgeries(self, obj):
@@ -89,7 +89,7 @@ class PatientSerializer(CachedSerializerMixin, serializers.ModelSerializer):
     def validate(self, data):
         if data.get('admitted') and not data.get('bed'):
             raise serializers.ValidationError(
-                "Bed assignment is required for admitted patients"
+                {"bed": ["Bed assignment is required for admitted patients"]}
             )
         return data
 
